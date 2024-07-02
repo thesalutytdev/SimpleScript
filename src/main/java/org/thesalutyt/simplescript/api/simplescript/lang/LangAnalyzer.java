@@ -70,6 +70,7 @@ public class LangAnalyzer {
                     String varName = otherSegment.split(":")[1].split("=")[0].trim();
                     String rawValue = otherSegment.split("=")[1].trim();
                     String varValue = valueAnalyzer(rawValue);
+                    System.out.println(varValue);
                     DefaultTypes varType = Type.getType(rawType);
                     if (!TypeChecker.checkType(varValue, varType)) {
                         Error.error(Error.ErrorType.SYNTAX_ERROR, "Var value does not match " + varType + " type");
@@ -173,6 +174,7 @@ public class LangAnalyzer {
     }
     public String[] varAnalyzer(String[] code, int id) {
         code[id] = (String) Variables.getVar(code[id].trim().replace("$", "").replace(";", "")).value;
+        System.out.println(code[id]);
         return code;
     }
     public String valueAnalyzer(String raw) {
@@ -181,7 +183,8 @@ public class LangAnalyzer {
             String v0 = split[0].trim();
             String v1 = split[1].trim();
             if (TypeChecker.checkType(v0, DefaultTypes.Int) && TypeChecker.checkType(v1, DefaultTypes.Int)) {
-                return String.valueOf(Integer.parseInt(v0) + Integer.parseInt(v1));
+                int sum = Integer.parseInt(v0) + Integer.parseInt(v1);
+                return String.valueOf(sum);
             } else if (TypeChecker.checkType(v0, DefaultTypes.Float) && TypeChecker.checkType(v1, DefaultTypes.Float)) {
                 return String.valueOf(Float.parseFloat(v0) + Float.parseFloat(v1));
             } else if (TypeChecker.checkType(v0, DefaultTypes.Double) && TypeChecker.checkType(v1, DefaultTypes.Double)) {
