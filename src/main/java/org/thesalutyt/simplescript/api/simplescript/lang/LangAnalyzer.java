@@ -29,6 +29,12 @@ public class LangAnalyzer {
     public boolean analyze(ILine line) throws FileNotFoundException {
         String[] code = line.code.split(" >> ");
         if (firstStep(code)) {
+            for (int i = 0; i < code.length; i++) {
+                if (code[i].trim().startsWith("$")) {
+                    code = varAnalyzer(code, i);
+                    // System.out.println(code);
+                }
+            }
             return deep(code);
         } else {
             Error.error(Error.ErrorType.SYNTAX_ERROR, "Unexpected usage of '" + code[0] + "' as key word");
@@ -62,7 +68,8 @@ public class LangAnalyzer {
                     String otherSegment = code[1].trim();
                     String rawType = otherSegment.split(":")[0].trim();
                     String varName = otherSegment.split(":")[1].split("=")[0].trim();
-                    String varValue = otherSegment.split("=")[1].trim();
+                    String rawValue = otherSegment.split("=")[1].trim();
+                    String varValue = valueAnalyzer(rawValue);
                     DefaultTypes varType = Type.getType(rawType);
                     if (!TypeChecker.checkType(varValue, varType)) {
                         Error.error(Error.ErrorType.SYNTAX_ERROR, "Var value does not match " + varType + " type");
@@ -84,7 +91,8 @@ public class LangAnalyzer {
                     String otherSegment = code[1].trim();
                     String rawType = otherSegment.split(":")[0].trim();
                     String varName = otherSegment.split(":")[1].split("=")[0].trim();
-                    String varValue = otherSegment.split("=")[1].trim();
+                    String rawValue = otherSegment.split("=")[1].trim();
+                    String varValue = valueAnalyzer(rawValue);
                     DefaultTypes varType = Type.getType(rawType);
                     if (!TypeChecker.checkType(varValue, varType)) {
                         Error.error(Error.ErrorType.SYNTAX_ERROR, "Constant value does not match " + varType + " type");
@@ -110,7 +118,8 @@ public class LangAnalyzer {
                         }
                     }
                     String name = code[objWordId + 1].split("=")[0].trim();
-                    String value = code[objWordId + 1].split("=")[1].trim();
+                    String rawValue = code[objWordId + 1].split("=")[1].trim();
+                    String value = valueAnalyzer(rawValue);
                     // System.out.println(name);
                     // System.out.println(Arrays.toString(code));
                     // System.out.println(value);
@@ -161,5 +170,70 @@ public class LangAnalyzer {
             return KeyWords.analyze(code);
         }
         return true;
+    }
+    public String[] varAnalyzer(String[] code, int id) {
+        code[id] = (String) Variables.getVar(code[id].trim().replace("$", "").replace(";", "")).value;
+        return code;
+    }
+    public String valueAnalyzer(String raw) {
+        if (raw.contains("+")) {
+            String[] split = raw.split("\\+");
+            String v0 = split[0].trim();
+            String v1 = split[1].trim();
+            if (TypeChecker.checkType(v0, DefaultTypes.Int) && TypeChecker.checkType(v1, DefaultTypes.Int)) {
+                return String.valueOf(Integer.parseInt(v0) + Integer.parseInt(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Float) && TypeChecker.checkType(v1, DefaultTypes.Float)) {
+                return String.valueOf(Float.parseFloat(v0) + Float.parseFloat(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Double) && TypeChecker.checkType(v1, DefaultTypes.Double)) {
+                return String.valueOf(Double.parseDouble(v0) + Double.parseDouble(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Str) && TypeChecker.checkType(v1, DefaultTypes.Str)) {
+                return String.valueOf(v0 + v1);
+            }
+        } else if (raw.contains("-")) {
+            String[] split = raw.split("-");
+            String v0 = split[0].trim();
+            String v1 = split[1].trim();
+            if (TypeChecker.checkType(v0, DefaultTypes.Int) && TypeChecker.checkType(v1, DefaultTypes.Int)) {
+                return String.valueOf(Integer.parseInt(v0) - Integer.parseInt(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Float) && TypeChecker.checkType(v1, DefaultTypes.Float)) {
+                return String.valueOf(Float.parseFloat(v0) - Float.parseFloat(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Double) && TypeChecker.checkType(v1, DefaultTypes.Double)) {
+                return String.valueOf(Double.parseDouble(v0) - Double.parseDouble(v1));
+            } else {
+                Error.error(Error.ErrorType.SYNTAX_ERROR, "Subtraction operation is not available for " + v0 + " and " + v1 + " types");
+                return null;
+            }
+        } else if (raw.contains("*")) {
+            String[] split = raw.split("\\*");
+            String v0 = split[0].trim();
+            String v1 = split[1].trim();
+            if (TypeChecker.checkType(v0, DefaultTypes.Int) && TypeChecker.checkType(v1, DefaultTypes.Int)) {
+                return String.valueOf(Integer.parseInt(v0) * Integer.parseInt(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Float) && TypeChecker.checkType(v1, DefaultTypes.Float)) {
+                return String.valueOf(Float.parseFloat(v0) * Float.parseFloat(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Double) && TypeChecker.checkType(v1, DefaultTypes.Double)) {
+                return String.valueOf(Double.parseDouble(v0) * Double.parseDouble(v1));
+            } else {
+                Error.error(Error.ErrorType.SYNTAX_ERROR, "Multiplication operation is not available for " + v0 + " and " + v1 + " types");
+                return null;
+            }
+        } else if (raw.contains("/")) {
+            String[] split = raw.split("/");
+            String v0 = split[0].trim();
+            String v1 = split[1].trim();
+            if (TypeChecker.checkType(v0, DefaultTypes.Int) && TypeChecker.checkType(v1, DefaultTypes.Int)) {
+                return String.valueOf(Integer.parseInt(v0) / Integer.parseInt(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Float) && TypeChecker.checkType(v1, DefaultTypes.Float)) {
+                return String.valueOf(Float.parseFloat(v0) / Float.parseFloat(v1));
+            } else if (TypeChecker.checkType(v0, DefaultTypes.Double) && TypeChecker.checkType(v1, DefaultTypes.Double)) {
+                return String.valueOf(Double.parseDouble(v0) / Double.parseDouble(v1));
+            } else {
+                Error.error(Error.ErrorType.SYNTAX_ERROR, "Division operation is not available for " + v0 + " and " + v1 + " types");
+                return null;
+            }
+        } else {
+            return raw.replace(";", "").replace("=", "").trim();
+        }
+        return null;
     }
 }
