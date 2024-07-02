@@ -1,12 +1,13 @@
 package org.thesalutyt.simplescript.api.simplescript.common.object.instances;
 
 import org.thesalutyt.simplescript.api.simplescript.common.object.DefaultTypes;
+import org.thesalutyt.simplescript.api.simplescript.common.object.ObjectList;
 
 public class ObjectInstance {
     protected DefaultTypes type;
-    protected final String name;
+    public final String name;
     protected boolean isFinal;
-    protected Object value;
+    public Object value;
     public ObjectInstance(String name, DefaultTypes type, boolean isFinal, Object value) {
         this.name = name;
         this.type = type;

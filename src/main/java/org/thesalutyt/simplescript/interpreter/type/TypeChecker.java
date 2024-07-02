@@ -6,11 +6,13 @@ import org.thesalutyt.simplescript.common.checker.Checker;
 import java.util.Objects;
 
 public class TypeChecker {
-    public static boolean checkType(String value, DefaultTypes expectedType) {
-        String value_ = value.replace(" ", "");
+    public static boolean checkType(String value_, DefaultTypes expectedType) {
         switch (expectedType) {
             case Str:
-                return value_.startsWith("\"") && value_.endsWith("\"");
+                if (value_.startsWith("\"") && value_.endsWith("\"")) {
+                    return true;
+                }
+                return false;
             case Bool:
                 return Objects.equals(value_, "true") || Objects.equals(value_, "false");
             case Int:
@@ -19,6 +21,7 @@ public class TypeChecker {
                 }
                 try {
                     int test = Integer.parseInt(value_);
+                    System.out.println(test);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }
@@ -29,6 +32,7 @@ public class TypeChecker {
                 }
                 try {
                     float test = Float.parseFloat(value_);
+                    System.out.println(test);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }
@@ -39,6 +43,7 @@ public class TypeChecker {
                 }
                 try {
                     double test = Double.parseDouble(value_);
+                    System.out.println(test);
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage());
                 }
