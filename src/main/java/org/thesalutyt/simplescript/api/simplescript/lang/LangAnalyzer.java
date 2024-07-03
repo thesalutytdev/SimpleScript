@@ -7,6 +7,8 @@ import org.thesalutyt.simplescript.api.simplescript.common.object.DefaultTypes;
 import org.thesalutyt.simplescript.api.simplescript.common.object.Object;
 import org.thesalutyt.simplescript.api.simplescript.common.object.ObjectList;
 import org.thesalutyt.simplescript.api.simplescript.common.variables.Variables;
+import org.thesalutyt.simplescript.api.simplescript.lang.object.executable.Executable;
+import org.thesalutyt.simplescript.api.simplescript.lang.object.executable.ExecutableList;
 import org.thesalutyt.simplescript.api.simplescript.lang.type.Type;
 import org.thesalutyt.simplescript.common.info.Info;
 import org.thesalutyt.simplescript.interpreter.Interpreter;
@@ -16,6 +18,7 @@ import org.thesalutyt.simplescript.interpreter.source.SourceType;
 import org.thesalutyt.simplescript.interpreter.type.TypeChecker;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -64,14 +67,28 @@ public class LangAnalyzer {
                     instance.currentLoopType = LoopType.WHILE;
                     break;
                 }
+                case "func": {
+                    String otherSegment = code[1].trim();
+                    String funcName = otherSegment.split(":")[0].trim();
+                    String returnType = otherSegment.split(":")[1].trim();
+                    String[] funcArgs = otherSegment.split(":")[2].split(",");
+                    String funcBody = otherSegment.split(":")[3].trim();
+                    ArrayList<java.lang.Object> argL = new ArrayList<>(Arrays.asList(funcArgs));
+                    Executable fExObj = new Executable(funcName, false, new Object(funcName, false, funcBody), argL);
+                    if (InterpreterInstance.isDebug) {
+                        System.out.println("Func created: " + funcName);
+                    }
+                    break;
+                }
                 case "var": {
                     String otherSegment = code[1].trim();
                     String rawType = otherSegment.split(":")[0].trim();
                     String varName = otherSegment.split(":")[1].split("=")[0].trim();
                     String rawValue = otherSegment.split("=")[1].trim();
                     String varValue = valueAnalyzer(rawValue);
-                    System.out.println(varValue);
+                    // System.out.println(varValue);
                     DefaultTypes varType = Type.getType(rawType);
+                    assert varType != null;
                     if (!TypeChecker.checkType(varValue, varType)) {
                         Error.error(Error.ErrorType.SYNTAX_ERROR, "Var value does not match " + varType + " type");
                         return false;
@@ -95,6 +112,7 @@ public class LangAnalyzer {
                     String rawValue = otherSegment.split("=")[1].trim();
                     String varValue = valueAnalyzer(rawValue);
                     DefaultTypes varType = Type.getType(rawType);
+                    assert varType != null;
                     if (!TypeChecker.checkType(varValue, varType)) {
                         Error.error(Error.ErrorType.SYNTAX_ERROR, "Constant value does not match " + varType + " type");
                         return false;
@@ -152,16 +170,18 @@ public class LangAnalyzer {
                 }
                 case "run": {
                     if (InterpreterInstance.isDebug) {
-                        System.out.println(code[1]);
+                        System.out.println("Running func: " + Arrays.toString(code));
                     }
-                    int objWordId = 0;
-                    for (int i = 0; i < code.length; i++) {
-                        if (Objects.equals(code[i], "object")) {
-                            objWordId = i;
-                        }
+                    String otherSegment = code[1].trim();
+                    String funcName = otherSegment.split(":")[0].trim();
+                    String rawArgs = otherSegment.split(":")[1].trim();
+                    String[] args = rawArgs.split(",");
+                    for (int i = 0; i < args.length; i++) {
+                        args[i] = args[i].trim();
+                        args[i] = args[i].replace("$", "").replace(";", "");
                     }
-                    String code_ = code[1];
-                    Info.interpreter.execute(SourceType.SCRIPT, code_);
+                    ArrayList<java.lang.Object> argL = new ArrayList<>(Arrays.asList(args));
+                    ExecutableList.functions.get(funcName).run(argL);
                     return true;
                 }
                 default:

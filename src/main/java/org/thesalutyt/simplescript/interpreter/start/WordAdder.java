@@ -10,5 +10,6 @@ public class WordAdder {
         ReservedWord.addReservedWord("object");
         ReservedWord.addReservedWord("const");
         ReservedWord.addReservedWord("run");
+        ReservedWord.addReservedWord("func");
     }
 }
